@@ -99,6 +99,36 @@ def verify_detached(
         )
 
 
+def private_key_from_pem_file(path: str, password: str = None) -> rsa.RSAPrivateKey:
+    """Loads a private key from a file.
+
+    The file must be in PEM format.
+    """
+    with open(path, "rb") as f:
+        return private_key_from_pem_bytes(f.read(), password)
+
+
+def private_key_from_pem_bytes(
+    pem_bytes: bytes, password: str = None
+) -> rsa.RSAPrivateKey:
+    """Loads a private key from a PEM string."""
+    return serialization.load_pem_private_key(pem_bytes, password=password)
+
+
+def certificate_from_pem_file(path: str) -> x509.Certificate:
+    """Loads a certificate from a file.
+
+    The file must be in PEM format.
+    """
+    with open(path, "rb") as f:
+        return certificate_from_pem_bytes(f.read())
+
+
+def certificate_from_pem_bytes(pem_bytes: bytes) -> x509.Certificate:
+    """Loads a certificate from a PEM string."""
+    return x509.load_pem_x509_certificate(pem_bytes)
+
+
 def main():
     import argparse, sys
     from getpass import getpass
@@ -129,8 +159,7 @@ def main():
             return f.read()
 
     args = parser.parse_args()
-    certificate_content = file_content(args.certificate)
-    certificate = x509.load_pem_x509_certificate(certificate_content)
+    certificate = certificate_from_pem_file(args.certificate)
     if args.payload:
         payload = file_content(args.payload).decode("utf-8")
     else:
@@ -140,8 +169,7 @@ def main():
             print("A key must be specified for signing", file=sys.stderr)
             sys.exit(1)
         password = args.password or None
-        key_content = file_content(args.key)
-        key = serialization.load_pem_private_key(key_content, password)
+        key = private_key_from_pem_file(args.key, password)
         output = sign(payload, key, certificate)
         if args.output:
             with open(args.output, "w") as f:
