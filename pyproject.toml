@@ -1,7 +1,10 @@
 [tool.poetry]
-name = "shinkansen"
-version = "0.1.0"
-description = ""
+name = "python-shinkansen"
+packages = [
+    {include = "shinkansen"}
+]
+version = "0.3.0"
+description = "Python helpers for Shinkansen"
 authors = ["Leonardo Soto M. <leo.soto@gmail.com>"]
 
 [tool.poetry.dependencies]
