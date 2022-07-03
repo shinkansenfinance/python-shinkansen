@@ -168,7 +168,7 @@ def main():
         if not args.key:
             print("A key must be specified for signing", file=sys.stderr)
             sys.exit(1)
-        password = args.password or None
+        password = args.password.encode("utf-8") if args.password else None
         key = private_key_from_pem_file(args.key, password)
         output = sign(payload, key, certificate)
         if args.output:
