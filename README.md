@@ -1,6 +1,6 @@
 # Shinkansen Python Helpers
 
-See https://docs.shinkansen.tech for guides on how to use.
+See https://docs.shinkansen.tech for user guides.
 
 ## Development
 
