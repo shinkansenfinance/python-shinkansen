@@ -2,9 +2,36 @@ from shinkansen import jws
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.hashes import SHA256
+from cryptography.hazmat.primitives import serialization
 from jwcrypto.jws import InvalidJWSSignature
+
 import datetime
 import pytest
+
+
+@pytest.fixture
+def certificate_and_key_pem_files(tmp_path):
+    """
+    Returns a tuple of file paths with certificate and key file. The key file
+    is encrypted with the password b"test-password".
+    """
+    certificate_file = tmp_path / "cert.pem"
+    key_file = tmp_path / "key.pem"
+    key = new_rsa_key()
+    certificate = new_certificate(key)
+    with open(key_file, "wb") as f:
+        f.write(
+            key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.BestAvailableEncryption(
+                    b"test-password"
+                ),
+            )
+        )
+    with open(certificate_file, "wb") as f:
+        f.write(certificate.public_bytes(serialization.Encoding.PEM))
+    return (certificate_file, key_file)
 
 
 def new_rsa_key() -> rsa.RSAPrivateKey:
@@ -73,3 +100,10 @@ def test_verify_non_whitelisted_certificate():
     expected_certificate = new_certificate(key)
     with pytest.raises(jws.CertificateNotWhitelisted):
         jws.verify_detached("test", signature, [expected_certificate])
+
+
+def test_private_key_and_cert_from_pem_file(certificate_and_key_pem_files):
+    certificate_file, key_file = certificate_and_key_pem_files
+    key = jws.private_key_from_pem_file(key_file, password=b"test-password")
+    certificate = jws.certificate_from_pem_file(certificate_file)
+    jws.verify_detached("test", jws.sign("test", key, certificate), [certificate])
