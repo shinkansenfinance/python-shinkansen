@@ -24,7 +24,11 @@ PyPI publishing:
 - Bump versions in `pyproject.toml` and `shinkansen/__init__.py`
 - Add & commit
 - Tag as `vX.Y.Z`
+
+      $ git tag vX.Y.Z
 - Push
+
+      $ git push origin main vX.Y.Z
 - Then run:
 
       $ poetry build
