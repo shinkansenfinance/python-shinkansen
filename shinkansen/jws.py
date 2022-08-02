@@ -85,6 +85,9 @@ def verify_detached(
 
     The whitelist should be limited to the certificates for the sender of the
     message being verified.
+
+    Raises an exception if the JWS is invalid or the certificate is not
+    whitelisted.
     """
     jws = JWS()
     jws.deserialize(detached_jws)
