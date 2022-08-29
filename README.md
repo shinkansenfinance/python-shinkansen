@@ -15,7 +15,7 @@ Install pre-commit hooks:
 
 Run tests:
 
-    $ poetry run tests
+    $ poetry run pytest
 
 ### Publish a new version
 
