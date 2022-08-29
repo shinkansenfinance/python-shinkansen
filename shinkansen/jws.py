@@ -4,7 +4,7 @@ from base64 import b64encode, b64decode
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography import x509
-from shinkansen import ShinkansenException
+from .common import ShinkansenException
 import json
 
 
