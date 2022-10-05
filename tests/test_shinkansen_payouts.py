@@ -137,6 +137,24 @@ def test_send_error(requests_mock):
     assert result.errors[1].error_message == "test 2"
 
 
+def test_send_error_without_json(requests_mock):
+    message = sample_message()
+    response = sample_error_response()
+    requests_mock.post(
+        "https://api.shinkansen.finance/v1/messages/payouts",
+        request_headers={
+            "Content-Type": "application/json",
+            "Shinkansen-Api-Key": "apikey123",
+            "Shinkansen-JWS-Signature": "sig456",
+        },
+        status_code=400,
+    )
+    result = message.send("sig456", "apikey123")
+    assert result.http_status_code == 400
+    assert len(result.transaction_ids) == 0
+    assert len(result.errors) == 0
+
+
 def test_payouts_as_json_with_implicit_fields():
     message = sample_message()
     json_string = message.as_json()

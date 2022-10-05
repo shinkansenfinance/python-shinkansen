@@ -178,18 +178,19 @@ class PayoutHttpResponse:
                 },
             )
         elif response.status_code == 400:
-            return PayoutHttpResponse(
-                http_status_code=response.status_code,
-                transaction_ids={},
-                errors=[
-                    PayoutHttpResponseError(e["error_code"], e["error_message"])
-                    for e in response.json()["errors"]
-                ],
-            )
-        else:
-            return PayoutHttpResponse(
-                http_status_code=response.status_code, errors=[], transaction_ids={}
-            )
+            try:
+                return PayoutHttpResponse(
+                    http_status_code=response.status_code,
+                    transaction_ids={},
+                    errors=[
+                        PayoutHttpResponseError(e["error_code"], e["error_message"])
+                        for e in response.json()["errors"]
+                    ],
+                )
+            except requests.exceptions.JSONDecodeError:
+                return PayoutHttpResponse(
+                    http_status_code=response.status_code, transaction_ids={}, errors=[]
+                )
 
 
 class PayoutMessage:
