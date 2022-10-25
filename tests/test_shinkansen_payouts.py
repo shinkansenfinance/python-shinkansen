@@ -306,3 +306,49 @@ def test_load_payout_from_json():
     assert tx.creditor.account_type == "current_account"
     assert tx.creditor.email == "juan@perez.cl"
     assert message.id == "aa05b434-0e5a-46f9-8282-6940c9731e6f"
+
+
+def test_load_payout_response_from_json():
+    json_string = """
+{
+    "document": {
+        "header": {
+            "creation_date": "2022-10-07T14:43:55Z", 
+            "message_id": "ff9ba434-367c-4e37-b66c-049c7cc0c605", 
+            "receiver": {
+                "fin_id": "TAMAGOTCHI", 
+                "fin_id_schema": "SHINKANSEN"
+            }, 
+            "sender": {
+                "fin_id": "SHINKANSEN", 
+                "fin_id_schema": "SHINKANSEN"
+            }
+        }, 
+        "responses": [
+            {
+                "response_id": "ff9ba434-367c-4e37-b66c-049c7cc0c605",
+                "response_message": "", 
+                "response_status": "ok", 
+                "shinkansen_transaction_id": "5e5a7344-9d46-4e4f-a05e-3dbd71e373ea", 
+                "shinkansen_transaction_message": "ok", 
+                "shinkansen_transaction_status": "ok", 
+                "transaction_id": "1545e0f0-b13c-436a-a67f-0077f0700b8d", 
+                "transaction_type": "payout"
+            }
+        ]
+    }
+}
+    """
+    json_dict = json.loads(json_string)
+    payout_response_dict = json_dict["document"]["responses"][0]
+    response = payouts.PayoutResponse.from_json_dict(payout_response_dict)
+    assert response is not None
+    assert response.response_id == "ff9ba434-367c-4e37-b66c-049c7cc0c605"
+    assert response.response_message == ""
+    assert response.response_status == "ok"
+    assert response.shinkansen_transaction_id == "5e5a7344-9d46-4e4f-a05e-3dbd71e373ea"
+    assert response.shinkansen_transaction_message == "ok"
+    assert response.shinkansen_transaction_status == "ok"
+    assert response.is_ok()
+    assert response.transaction_id == "1545e0f0-b13c-436a-a67f-0077f0700b8d"
+    assert response.transaction_type == "payout"

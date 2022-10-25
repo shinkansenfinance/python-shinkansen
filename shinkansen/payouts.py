@@ -7,28 +7,9 @@ from typing import Tuple
 from datetime import datetime, timezone
 from .common import *
 from .jws import sign, rsa, x509
+from .responses import PayoutResponse
 
-
-class PayoutMessageHeader:
-    """The header of a payout message with:
-
-    - sender: The financial institution sending the message
-    - receiver: The financial institution receiving the message
-    - message_id: The ID of the message (UUID string)
-    - creation_date: The date the message was created (ISO8601)
-    """
-
-    def __init__(
-        self,
-        sender: FinancialInstitution,
-        receiver: FinancialInstitution,
-        message_id: str = None,
-        creation_date: str = None,
-    ) -> None:
-        self.sender = sender
-        self.receiver = receiver
-        self.message_id = message_id or str(uuid.uuid4())
-        self.creation_date = creation_date or datetime.now(timezone.utc).isoformat()
+PayoutMessageHeader = MessageHeader  # for backwards compatibility
 
 
 class PayoutDebtor:
@@ -94,7 +75,7 @@ class PayoutTransaction:
     - currency: The currency of the transaction
     - amount: The amount of the transaction (string)
     - description: The description of the transaction
-    - execution_date: The date the transaction should preferrably be executed
+    - execution_date: The date the transaction should preferably be executed
     - debtor: The debtor of the transaction
     - creditor: The creditor of the transaction
     """
@@ -110,11 +91,11 @@ class PayoutTransaction:
         transaction_id: str = None,
     ) -> None:
         self.transaction_type = "payout"
-        self.transaction_id = transaction_id or str(uuid.uuid4())
+        self.transaction_id = transaction_id or random_uuid()
         self.currency = currency
         self.amount = amount
         self.description = description
-        self.execution_date = execution_date or datetime.now(timezone.utc).isoformat()
+        self.execution_date = execution_date or now_as_isoformat()
         self.debtor = debtor
         self.creditor = creditor
 
@@ -211,26 +192,11 @@ class PayoutMessage:
         return json.dumps({"document": self}, default=lambda o: o.__dict__)
 
     @classmethod
-    def from_json(cls, json_string: str) -> str:
-        """Return a Message from a JSON string"""
+    def from_json(cls, json_string: str) -> "PayoutMessage":
+        """Return a message from a JSON string"""
         json_dict = json.loads(json_string)
-        return PayoutMessage(
-            header=PayoutMessageHeader(
-                sender=FinancialInstitution(
-                    fin_id_schema=json_dict["document"]["header"]["sender"][
-                        "fin_id_schema"
-                    ],
-                    fin_id=json_dict["document"]["header"]["sender"]["fin_id"],
-                ),
-                receiver=FinancialInstitution(
-                    fin_id_schema=json_dict["document"]["header"]["receiver"][
-                        "fin_id_schema"
-                    ],
-                    fin_id=json_dict["document"]["header"]["receiver"]["fin_id"],
-                ),
-                message_id=json_dict["document"]["header"]["message_id"],
-                creation_date=json_dict["document"]["header"]["creation_date"],
-            ),
+        return cls(
+            header=PayoutMessageHeader.from_json_dict(json_dict["document"]["header"]),
             transactions=[
                 PayoutTransaction(
                     currency=t["currency"],

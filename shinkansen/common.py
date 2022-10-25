@@ -1,10 +1,14 @@
+from datetime import datetime, timezone
+import uuid
+
+
 class ShinkansenException(Exception):
     """Base class for Shinkansen exceptions."""
 
     pass
 
 
-class FinancialInstitution(object):
+class FinancialInstitution:
     """A Financial institution with:
 
     - fin_id_schema: The schema of the financial institution's ID
@@ -16,7 +20,7 @@ class FinancialInstitution(object):
         self.fin_id_schema = fin_id_schema or "SHINKANSEN"
 
 
-class PersonId(object):
+class PersonId:
     """A person's ID with:
 
     - id_schema: The schema of the person's ID
@@ -26,6 +30,51 @@ class PersonId(object):
     def __init__(self, id_schema: str, id: str) -> None:
         self.id_schema = id_schema
         self.id = id
+
+
+class MessageHeader:
+    """The header of a shinkansen message with:
+
+    - sender: The financial institution sending the message
+    - receiver: The financial institution receiving the message
+    - message_id: The ID of the message (UUID string)
+    - creation_date: The date the message was created (ISO8601)
+    """
+
+    def __init__(
+        self,
+        sender: FinancialInstitution,
+        receiver: FinancialInstitution,
+        message_id: str = None,
+        creation_date: str = None,
+    ) -> None:
+        self.sender = sender
+        self.receiver = receiver
+        self.message_id = message_id or random_uuid()
+        self.creation_date = creation_date or now_as_isoformat()
+
+    @classmethod
+    def from_json_dict(cls, json_dict: dict):
+        return cls(
+            sender=FinancialInstitution(
+                fin_id_schema=json_dict["sender"]["fin_id_schema"],
+                fin_id=json_dict["sender"]["fin_id"],
+            ),
+            receiver=FinancialInstitution(
+                fin_id_schema=json_dict["receiver"]["fin_id_schema"],
+                fin_id=json_dict["receiver"]["fin_id"],
+            ),
+            message_id=json_dict["message_id"],
+            creation_date=json_dict["creation_date"],
+        )
+
+
+def random_uuid():
+    return str(uuid.uuid4())
+
+
+def now_as_isoformat():
+    return datetime.now(timezone.utc).isoformat()
 
 
 # Institutions:
