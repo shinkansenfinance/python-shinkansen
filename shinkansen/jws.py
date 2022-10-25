@@ -1,11 +1,16 @@
 from jwcrypto.jwk import JWK
-from jwcrypto.jws import JWS
+from jwcrypto.jws import JWS, InvalidJWSSignature as _InvalidJWSSignature
+
 from base64 import b64encode, b64decode
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography import x509
 from .common import ShinkansenException
 import json
+
+
+class InvalidSignature(ShinkansenException):
+    """Raised when a signature is invalid."""
 
 
 class InvalidJWS(ShinkansenException):
@@ -95,7 +100,10 @@ def verify_detached(
     certificate = x509.load_der_x509_certificate(x5c_first_der)
     jwk = JWK()
     jwk.import_from_pyca(certificate.public_key())
-    jws.verify(jwk, alg="PS256", detached_payload=payload)
+    try:
+        jws.verify(jwk, alg="PS256", detached_payload=payload)
+    except _InvalidJWSSignature as e:
+        raise InvalidSignature("Invalid JWS signature") from e
     if all(_der(c) != x5c_first_der for c in certificate_whitelist):
         raise CertificateNotWhitelisted(
             "Signature valid, but certificate not in whitelist"

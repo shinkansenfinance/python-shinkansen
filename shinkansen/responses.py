@@ -4,6 +4,19 @@ import uuid
 from datetime import datetime, timezone
 from typing import List
 from .common import *
+from . import jws
+
+
+class UnexpectedSender(ShinkansenException):
+    """The sender of the message is different than expected."""
+
+    pass
+
+
+class UnexpectedReceiver(ShinkansenException):
+    """The receiver of the message is different than expected."""
+
+    pass
 
 
 class Response:
@@ -105,9 +118,11 @@ class ResponseMessage:
         self,
         header: MessageHeader,
         responses: List[Response],
+        original_json: str = None,
     ) -> None:
         self.header = header
         self.responses = responses
+        self.original_json = original_json
 
     def as_json(self) -> str:
         """Returns the message as a JSON object"""
@@ -123,4 +138,43 @@ class ResponseMessage:
                 Response.from_json_dict(response)
                 for response in json_dict["document"]["responses"]
             ],
+            original_json=json_string,
         )
+
+    @property
+    def id(self) -> str:
+        """Returns the id of the message"""
+        return self.header.message_id
+
+    def verify(
+        self,
+        detached_jws: str,
+        sender_certificates: List[jws.x509.Certificate],
+        sender: FinancialInstitution,
+        receiver: FinancialInstitution,
+    ):
+        """
+        Verifies the message signature and checks that the sender and receiver
+        are as expected.
+
+        Raises an exception if the verification fails:
+
+        - shinkansen.jws.InvalidJWS -> Invalid JWS object
+        - shinkansen.jws.InvalidSignature -> Invalid signature
+        - shinkansen.jws.CertificateNotWhitelisted -> Unexpected sender certificate
+        - shinkansen.responses.UnexpectedSender -> Unexpected sender
+        - shinkansen.responses.UnexpectedReceiver -> Unexpected receiver
+
+        The sender is almost always SHINKANSEN and the receiver is your company
+        ('financial institution'). It's important to check those fields to avoid
+        replay attacks.
+        """
+        jws.verify_detached(self.original_json, detached_jws, sender_certificates)
+        if self.header.sender != sender:
+            raise UnexpectedSender(
+                "Expected sender %s, got %s" % (sender, self.header.sender)
+            )
+        if self.header.receiver != receiver:
+            raise UnexpectedReceiver(
+                "Expected receiver %s, got %s" % (receiver, self.header.receiver)
+            )

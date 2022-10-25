@@ -246,6 +246,13 @@ class PayoutMessage:
         """Returns the ID of the message"""
         return self.header.message_id
 
+    def signature(
+        self,
+        certificate_private_key: rsa.RSAPrivateKey,
+        certificate: x509.Certificate,
+    ) -> str:
+        return sign(self.as_json(), certificate_private_key, certificate)
+
     def sign_and_send(
         self,
         certificate_private_key: rsa.RSAPrivateKey,
@@ -254,7 +261,7 @@ class PayoutMessage:
         base_url: str = None,
     ) -> Tuple[str, PayoutHttpResponse]:
         """Signs the message and sends it to the Shinkansen API"""
-        signature = sign(self.as_json(), certificate_private_key, certificate)
+        signature = self.signature(certificate_private_key, certificate)
         return (signature, self.send(signature, api_key, base_url))
 
     def send(

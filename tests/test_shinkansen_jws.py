@@ -3,7 +3,6 @@ from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives import serialization
-from jwcrypto.jws import InvalidJWSSignature
 
 import datetime
 import pytest
@@ -81,7 +80,7 @@ def test_verify_invalid_signature_content_changed():
     key = new_rsa_key()
     certificate = new_certificate(key)
     signature = jws.sign("test", key, certificate)
-    with pytest.raises(InvalidJWSSignature):
+    with pytest.raises(jws.InvalidSignature):
         jws.verify_detached("modifiedtest", signature, [certificate])
 
 
@@ -89,7 +88,7 @@ def test_verify_invalid_signature_jws_changed():
     key = new_rsa_key()
     certificate = new_certificate(key)
     signature = jws.sign("test", key, certificate)
-    with pytest.raises(InvalidJWSSignature):
+    with pytest.raises(jws.InvalidSignature):
         jws.verify_detached("test", signature + "x", [certificate])
 
 

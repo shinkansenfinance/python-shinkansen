@@ -19,6 +19,14 @@ class FinancialInstitution:
         self.fin_id = fin_id
         self.fin_id_schema = fin_id_schema or "SHINKANSEN"
 
+    def __eq__(self, __o: object) -> bool:
+        if isinstance(__o, FinancialInstitution):
+            return self.fin_id == __o.fin_id and self.fin_id_schema == __o.fin_id_schema
+        return False
+
+    def __hash__(self) -> int:
+        return hash((self.fin_id, self.fin_id_schema))
+
 
 class PersonId:
     """A person's ID with:
@@ -30,6 +38,14 @@ class PersonId:
     def __init__(self, id_schema: str, id: str) -> None:
         self.id_schema = id_schema
         self.id = id
+
+    def __eq__(self, __o: object) -> bool:
+        if isinstance(__o, PersonId):
+            return self.id_schema == __o.id_schema and self.id == __o.id
+        return False
+
+    def __hash__(self) -> int:
+        return hash((self.id_schema, self.id))
 
 
 class MessageHeader:
