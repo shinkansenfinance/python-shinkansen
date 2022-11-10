@@ -164,9 +164,11 @@ class PayoutHttpResponse:
                     ],
                 )
             except requests.exceptions.JSONDecodeError:
-                return PayoutHttpResponse(
-                    http_status_code=response.status_code, transaction_ids={}, errors=[]
-                )
+                pass  # go to the catch-all at the end
+        # Catch all:
+        return PayoutHttpResponse(
+            http_status_code=response.status_code, transaction_ids={}, errors=[]
+        )
 
 
 class PayoutMessage:
