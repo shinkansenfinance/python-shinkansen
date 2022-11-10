@@ -142,11 +142,6 @@ class PayoutHttpResponse:
         return f"PayoutHttpResponse({self.http_status_code}, {self.transaction_ids}, {self.errors})"
 
     @classmethod
-    def _map_transaction_ids(cls, json_list: list[dict]) -> dict[str, str]:
-        """Map the transaction ids in the response to the transaction ids in the message"""
-        return
-
-    @classmethod
     def from_http_response(cls, response: requests.Response) -> PayoutHttpResponse:
         """Return a PayoutSyncResponse from a HTTP response"""
         if response.status_code in (200, 409):
