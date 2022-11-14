@@ -111,7 +111,7 @@ class ResponseMessage:
     """A response message with:
 
     - header: The header of the message
-    - transactions: A list of transactions contained in the message
+    - responses: A list of responses contained in the message
     """
 
     def __init__(
