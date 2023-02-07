@@ -203,6 +203,9 @@ PyPI publishing:
       $ poetry build
       $ poetry publish
 
+(You need to run `poetry config http-basic.pypi __token__ $PYPI_TOKEN` first for
+`poetry publish` to work.)
+
 ## Troubleshooting
 
 If `poetry install` fails on MacOS, it's likely due to the cryptography library
