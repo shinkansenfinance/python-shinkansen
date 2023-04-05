@@ -186,7 +186,10 @@ class PayoutMessage:
 
     def as_json(self) -> str:
         """Returns the message as a JSON object"""
-        return json.dumps({"document": self}, default=lambda o: o.__dict__)
+        return json.dumps(
+            {"document": self},
+            default=lambda o: {k: v for (k, v) in o.__dict__.items() if v is not None},
+        )
 
     @classmethod
     def from_json(cls, json_string: str) -> "PayoutMessage":

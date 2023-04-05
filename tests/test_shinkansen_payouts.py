@@ -234,6 +234,16 @@ def test_payouts_as_json_with_implicit_fields():
     assert tx2["creditor"]["email"] == "test2@example.org"
 
 
+def test_payouts_as_json_without_creditor_financial_institution():
+    message = sample_message()
+    message.transactions[0].creditor.financial_institution = None
+    json_string = message.as_json()
+    parsed_json = json.loads(json_string)
+    doc = parsed_json["document"]
+    tx = doc["transactions"][0]
+    assert "financial_institution" not in tx["creditor"]
+
+
 def test_load_payout_from_json():
     json_string = """
 {
