@@ -105,6 +105,99 @@ for transaction in message.transaction:
     print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
 ```
 
+## Sending Payins
+### Building a payin message
+
+```python
+from shinkansen import payins, common
+
+message = payins.PayinMessage(
+  header=common.MessageHeader(
+    sender=common.FinancialInstitution("YOUR-ID-IN-SHINKANSEN"),
+    receiver=common.SHINKANSEN,
+  ),
+  transactions=[
+    payins.PayinTransaction(
+      payin_type=payins.INTERACTIVE_PAYMENT,
+      currency=common.CLP,
+      amount="1000",
+      description="Test transaction",
+      creditor=payins.PayinCreditor(
+        name="Test Creditor",
+        identification=common.PersonId("CLID", "111111111-1"),
+        financial_institution=common.FinancialInstitution("ID_OF_DESTINATION_BANK"),
+        account="123456",
+        account_type=common.CURRENT_ACCOUNT,
+        email="destination@example.org"
+      )
+    )
+  ]
+)
+```
+
+### Converting to JSON
+
+```python
+message_as_json = message.as_json()
+```
+### Creating from JSON
+
+```python
+same_message = payins.PayinMessage.from_json(message_as_json)
+```
+### Signing a message
+
+```python
+import os
+from shinkansen import jws
+# Load RSA key and certificate from file system, password from env var.
+private_key = jws.private_key_from_pem_file("/path/to/privatekey.pem",
+  password=os.getenv('PRIVATE_KEY_PASSWORD'))
+public_cert = jws.certificate_from_pem_file("/path/to/certificate.pem")
+# You can also use jws.private_key_from_pem_bytes() and 
+# jws.certificate_from_pem_bytes() if you prefer to load everything from env 
+# vars or somewhere else.
+
+signature = message.signature(private_key, public_cert)
+```
+
+Note that the RSA-PSS signature is non-deterministic, so you might not get the 
+same signature for the same message on every invocation. As long as you 
+don't modify the message, any of those signatures will be valid.
+### Send a message and get the http response
+
+```python
+api_key = os.getenv("SHINKANSEN_API_KEY")
+payin_http_response = message.send(
+    signature, api_key
+    #, base_url=https://dev.shinkansen.finance/v1 if you don't want to hit production
+)
+
+print(f"HTTP Response Status: {payin_http_response.http_status_code}")
+for error in payin_http_response.errors:
+    print(f"Error code {error.error_code}: {error.error_message}")
+for transaction in message.transaction:
+    original_tx_id = transaction.transaction_id
+    shinkansen_tx_id = payin_http_response.transaction_ids[original_tx_id]
+    print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
+```
+
+You can also sign and send on one call:
+
+```python
+signature, payin_http_response = message.sign_and_send(
+    signature, private_key, public_cert, api_key
+)
+print(f"HTTP Response Status: {payin_http_response.http_status_code}")
+for error in payin_http_response.errors:
+    print(f"Error code {error.error_code}: {error.error_message}")
+for transaction in message.transaction:
+    original_tx_id = transaction.transaction_id
+    shinkansen_tx_id = payin_http_response.transaction_ids[original_tx_id]
+    print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
+```
+
+
 ## Validate Shinkansen Responses
 
 When Shinkansen calls you back (using your webhook), you need to parse it and:
