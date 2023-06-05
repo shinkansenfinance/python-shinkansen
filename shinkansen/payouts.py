@@ -1,14 +1,13 @@
 from __future__ import annotations
-import uuid
 import json
 import os
 import requests
 from typing import Tuple
-from datetime import datetime, timezone
 from .common import *
 from .jws import sign, rsa, x509
-from .responses import PayoutResponse
+from . import responses
 
+PayoutResponse = responses.PayoutResponse  # for backwards compatibility
 PayoutMessageHeader = MessageHeader  # for backwards compatibility
 
 
