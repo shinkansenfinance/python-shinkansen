@@ -107,6 +107,28 @@ class PayoutResponse(Response):
     pass  # No extra fields for payout responses
 
 
+@Response.for_transaction_type("payin")
+class PayinResponse(Response):
+    """Payin response with:
+
+    - response_id: The id of the response itself.
+    - transaction_id: The id of the original transaction for this response corresponds to.
+    - shinkansen_transaction_id: The shinkansen assigned id for the original transaction.
+    - shinkansen_transaction_status: The resulting status of the transaction
+    - shinkansen_transaction_message: Human readable message further explaining the statuse of the transaction
+    - response_status: The status of the response. Valid values depend on the transaction type
+    - response_message: Human readable message explaining the response status
+    - expected_settlement_date: When funds are expected to arrive
+    - additional_info: A dict with additional info about the transaction"""
+
+    def __init__(
+        self, **kwargs  # Ignore unexpected fields, so forwards compatibility is easier
+    ):
+        super().__init__(**kwargs)
+        self.expected_settlement_date = kwargs.get("expected_settlement_date")
+        self.additional_info = kwargs.get("additional_info")
+
+
 class ResponseMessage:
     """A response message with:
 
