@@ -160,6 +160,9 @@ print(response_message.header.creation_date)
 for transaction_response in response_message.responses:
     print(transaction_response.transaction_type) 
     # -> e.g: "payout" for a response to a payout transaction
+    # The response class will match the transaction type. So you'll get a
+    # shinkansen.responses.PayoutResponse for a payout transaction and a
+    # shinkansen.responses.PayinResponse for a payin transaction.
     print(transaction_response.transaction_id)
     print(transaction_response.shinkansen_transaction_id)
     print(transaction_response.shinkansen_transaction_status) 
