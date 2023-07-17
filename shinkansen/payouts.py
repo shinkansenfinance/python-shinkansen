@@ -223,11 +223,8 @@ class PayoutMessage:
                             id_schema=t["creditor"]["identification"]["id_schema"],
                             id=t["creditor"]["identification"]["id"],
                         ),
-                        financial_institution=FinancialInstitution(
-                            fin_id_schema=t["creditor"]["financial_institution"][
-                                "fin_id_schema"
-                            ],
-                            fin_id=t["creditor"]["financial_institution"]["fin_id"],
+                        financial_institution=cls._optional_fi(
+                            t["creditor"].get("financial_institution")
                         ),
                         account=t["creditor"]["account"],
                         account_type=t["creditor"]["account_type"],
@@ -238,6 +235,14 @@ class PayoutMessage:
                 )
                 for t in json_dict["document"]["transactions"]
             ],
+        )
+
+    @classmethod
+    def _optional_fi(self, d: dict):
+        if d is None:
+            return None
+        return FinancialInstitution(
+            fin_id_schema=d.get("fin_id_schema"), fin_id=d.get("fin_id")
         )
 
     @property

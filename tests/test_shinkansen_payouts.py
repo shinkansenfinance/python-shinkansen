@@ -336,6 +336,96 @@ def test_load_payout_from_json():
     assert message.id == "aa05b434-0e5a-46f9-8282-6940c9731e6f"
 
 
+def test_load_payout_from_json_without_creditor_fi():
+    # For some cases the creditor financial institution is not present
+    # (e.g: Mexico where a CLABE includes routing information) and we weren't
+    # handling this correctly
+    json_string = """
+{
+  "document": {
+    "header": {
+      "sender": {
+        "fin_id": "TAMAGOTCHI",
+        "fin_id_schema": "SHINKANSEN"
+      },
+      "receiver": {
+        "fin_id": "SHINKANSEN",
+        "fin_id_schema": "SHINKANSEN"
+      },
+      "message_id": "aa05b434-0e5a-46f9-8282-6940c9731e6f",
+      "creation_date": "2022-08-29T20:29:19.313009+00:00"
+    },
+    "transactions": [
+      {
+        "transaction_type": "payout",
+        "transaction_id": "fe0d5e0c-b7af-422e-9eba-e67056620f31",
+        "currency": "MXN",
+        "amount": "428617",
+        "description": "Transferencia de prueba",
+        "execution_date": "2022-08-29T20:29:19.314128+00:00",
+        "debtor": {
+          "name": "Fictional Tamagotchi SpA",
+          "identification": {
+            "id_schema": "MXRFC",
+            "id": "ABC680524P76"
+          },
+          "financial_institution": {
+            "fin_id": "BBVA_MX",
+            "fin_id_schema": "SHINKANSEN"
+          },
+          "account": "4242424242424242",
+          "account_type": "current_account",
+          "email": "team@shinkansen.cl"
+        },
+        "creditor": {
+          "name": "Juan Perez",
+          "identification": {
+            "id_schema": "MXRFC",
+            "id": "VECJ880326XXX"
+          },
+          "account": "123456789",
+          "account_type": "clabe",
+          "email": "juan@perez.mx"
+        }
+      }
+    ]
+  }
+}    
+    """
+    message = payouts.PayoutMessage.from_json(json_string)
+    assert message is not None
+    assert message.header.sender.fin_id == "TAMAGOTCHI"
+    assert message.header.sender.fin_id_schema == "SHINKANSEN"
+    assert message.header.receiver.fin_id == "SHINKANSEN"
+    assert message.header.receiver.fin_id_schema == "SHINKANSEN"
+    assert message.header.message_id == "aa05b434-0e5a-46f9-8282-6940c9731e6f"
+    assert message.header.creation_date == "2022-08-29T20:29:19.313009+00:00"
+    assert len(message.transactions) == 1
+    tx = message.transactions[0]
+    assert tx.transaction_type == "payout"
+    assert tx.transaction_id == "fe0d5e0c-b7af-422e-9eba-e67056620f31"
+    assert tx.currency == "MXN"
+    assert tx.amount == "428617"
+    assert tx.description == "Transferencia de prueba"
+    assert tx.execution_date == "2022-08-29T20:29:19.314128+00:00"
+    assert tx.debtor.name == "Fictional Tamagotchi SpA"
+    assert tx.debtor.identification.id_schema == "MXRFC"
+    assert tx.debtor.identification.id == "ABC680524P76"
+    assert tx.debtor.financial_institution.fin_id == "BBVA_MX"
+    assert tx.debtor.financial_institution.fin_id_schema == "SHINKANSEN"
+    assert tx.debtor.account == "4242424242424242"
+    assert tx.debtor.account_type == "current_account"
+    assert tx.debtor.email == "team@shinkansen.cl"
+    assert tx.creditor.name == "Juan Perez"
+    assert tx.creditor.identification.id_schema == "MXRFC"
+    assert tx.creditor.identification.id == "VECJ880326XXX"
+    assert tx.creditor.financial_institution is None
+    assert tx.creditor.account == "123456789"
+    assert tx.creditor.account_type == "clabe"
+    assert tx.creditor.email == "juan@perez.mx"
+    assert message.id == "aa05b434-0e5a-46f9-8282-6940c9731e6f"
+
+
 def test_load_payout_response_from_json():
     json_string = """
 {
