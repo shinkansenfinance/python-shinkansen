@@ -98,6 +98,7 @@ SHINKANSEN = FinancialInstitution("SHINKANSEN")
 
 # Account Types:
 CURRENT_ACCOUNT = "current_account"
+CLABE = "clabe"
 CASH_ACCOUNT = "cash_account"
 SAVINGS_ACCOUNT = "savings_account"
 
