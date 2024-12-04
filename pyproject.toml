@@ -3,7 +3,7 @@ name = "python-shinkansen"
 packages = [
     {include = "shinkansen"}
 ]
-version = "0.7.4"
+version = "0.7.5"
 description = "Python helpers for Shinkansen"
 authors = ["Leonardo Soto M. <leo.soto@gmail.com>"]
 
