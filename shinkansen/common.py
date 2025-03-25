@@ -105,6 +105,10 @@ SAVINGS_ACCOUNT = "savings_account"
 ACCOUNT_TYPES = [CURRENT_ACCOUNT, CASH_ACCOUNT, SAVINGS_ACCOUNT]
 # Currencies:
 CLP = "CLP"
+COP = "COP"
+MXN = "MXN"
+PEN = "PEN"
+USD = "USD"
 
 MAIN_BANKS = {
     "CL": {
