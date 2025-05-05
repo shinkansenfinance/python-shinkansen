@@ -23,8 +23,7 @@ def sample_message() -> payouts.PayoutMessage:
                 creditor=payouts.PayoutCreditor(
                     name="Test Creditor",
                     identification=payouts.PersonId("CLID", "11111111-1"),
-                    financial_institution=payouts.FinancialInstitution(
-                        "BANK2"),
+                    financial_institution=payouts.FinancialInstitution("BANK2"),
                     account="00000000",
                     account_type=payouts.CASH_ACCOUNT,
                     email="test@example.org",
@@ -44,8 +43,7 @@ def sample_message() -> payouts.PayoutMessage:
                 creditor=payouts.PayoutCreditor(
                     name="Test Creditor 2",
                     identification=payouts.PersonId("CLID", "22222222-2"),
-                    financial_institution=payouts.FinancialInstitution(
-                        "BANK3"),
+                    financial_institution=payouts.FinancialInstitution("BANK3"),
                     account="22222222",
                     account_type=payouts.SAVINGS_ACCOUNT,
                     email="test2@example.org",
