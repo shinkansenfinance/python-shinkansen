@@ -88,6 +88,12 @@ class PayoutTransaction:
         creditor: PayoutCreditor,
         execution_date: str = None,
         transaction_id: str = None,
+        reference_number: str = None,
+        tracking_key: str = None,
+        payment_purpose_category: str = "default",
+        payment_rail: str = "default",
+        execution_mode: str = "default",
+        po_connection: str = "default",
     ) -> None:
         self.transaction_type = "payout"
         self.transaction_id = transaction_id or random_uuid()
@@ -97,6 +103,12 @@ class PayoutTransaction:
         self.execution_date = execution_date or now_as_isoformat()
         self.debtor = debtor
         self.creditor = creditor
+        self.reference_number = reference_number
+        self.tracking_key = tracking_key
+        self.payment_purpose_category = payment_purpose_category
+        self.payment_rail = payment_rail
+        self.execution_mode = execution_mode
+        self.po_connection = po_connection
 
 
 class PayoutHttpResponseError:
@@ -201,6 +213,12 @@ class PayoutMessage:
                     currency=t["currency"],
                     amount=t["amount"],
                     description=t["description"],
+                    reference_number=t.get("reference_number"),
+                    tracking_key=t.get("tracking_key"),
+                    payment_purpose_category=t.get("payment_purpose_category"),
+                    payment_rail=t.get("payment_rail"),
+                    execution_mode=t.get("execution_mode"),
+                    po_connection=t.get("po_connection"),
                     debtor=PayoutDebtor(
                         name=t["debtor"]["name"],
                         identification=PersonId(

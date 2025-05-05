@@ -31,6 +31,12 @@ def sample_message() -> payouts.PayoutMessage:
                 amount="100",
                 currency=payouts.CLP,
                 description="Test description",
+                tracking_key="AAA123467", #Optional
+                reference_number = "1234567", #Optional
+                payment_purpose_category = "default", #Optional
+                payment_rail = "default", #Optional
+                execution_mode = "default", #Optional
+                po_connection = "default", #Optional
             ),
             payouts.PayoutTransaction(
                 debtor=debtor,
@@ -45,6 +51,12 @@ def sample_message() -> payouts.PayoutMessage:
                 amount="200",
                 currency=payouts.CLP,
                 description="Test description 2",
+                tracking_key="BBB123468", #Optional
+                reference_number = "1234568", #Optional
+                payment_purpose_category = "default", #Optional
+                payment_rail = "default", #Optional
+                execution_mode = "default", #Optional
+                po_connection = "default", #Optional
             ),
         ],
     )
@@ -193,6 +205,12 @@ def test_payouts_as_json_with_implicit_fields():
     assert tx1["currency"] == "CLP"
     assert tx1["amount"] == "100"
     assert tx1["description"] == "Test description"
+    assert tx1["tracking_key"]=="AAA123467" #Optional
+    assert tx1["reference_number"] == "1234567" #Optional
+    assert tx1["payment_purpose_category"] == "default"  #Optional
+    assert tx1["payment_rail"] == "default" #Optional
+    assert tx1["execution_mode"] == "default" #Optional
+    assert tx1["po_connection"] == "default" #Optional
     assert tx1["execution_date"] is not None
     assert tx1["debtor"]["name"] == "Test Debtor"
     assert tx1["debtor"]["identification"]["id_schema"] == "CLID"
@@ -215,6 +233,12 @@ def test_payouts_as_json_with_implicit_fields():
     assert tx2["currency"] == "CLP"
     assert tx2["amount"] == "200"
     assert tx2["description"] == "Test description 2"
+    assert tx2["tracking_key"]=="BBB123468" #Optional
+    assert tx2["reference_number"] == "1234568" #Optional
+    assert tx2["payment_purpose_category"] == "default"  #Optional
+    assert tx2["payment_rail"] == "default" #Optional
+    assert tx2["execution_mode"] == "default" #Optional
+    assert tx2["po_connection"] == "default" #Optional
     assert tx2["execution_date"] is not None
     assert tx2["debtor"]["name"] == "Test Debtor"
     assert tx2["debtor"]["identification"]["id_schema"] == "CLID"
