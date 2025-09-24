@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Extract version from files
+        id: version_check
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          VERSION="${TAG#v}"
+
+          INIT_VERSION=$(grep -Po '(?<=^__version__ = ")[^"]+' shinkansen/__init__.py)
+
+          echo "Tag: $TAG"
+          echo "Version from __init__.py: $INIT_VERSION"
+
+          if [ "$INIT_VERSION" != "$VERSION" ]; then
+            echo "❌ Version mismatch between tag and __init__.py"
+            exit 1
+          fi
+
+          echo "✅ Versions match"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Configure Poetry for PyPI
+        run: poetry config http-basic.pypi __token__ ${{ secrets.PYPI_TOKEN }}
+
+      - name: Build and publish
+        run: |
+          poetry build
+          poetry publish
