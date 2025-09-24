@@ -29,10 +29,17 @@ jobs:
           TAG="${GITHUB_REF##*/}"
           VERSION="${TAG#v}"
 
+          PYPROJECT_VERSION=$(grep -Po '(?<=^version = ")[^"]+' pyproject.toml)
           INIT_VERSION=$(grep -Po '(?<=^__version__ = ")[^"]+' shinkansen/__init__.py)
 
           echo "Tag: $TAG"
+          echo "Version from pyproject.toml: $PYPROJECT_VERSION"
           echo "Version from __init__.py: $INIT_VERSION"
+
+          if [ "$PYPROJECT_VERSION" != "$VERSION" ]; then
+            echo "❌ Version mismatch between tag and pyproject.toml"
+            exit 1
+          fi
 
           if [ "$INIT_VERSION" != "$VERSION" ]; then
             echo "❌ Version mismatch between tag and __init__.py"
