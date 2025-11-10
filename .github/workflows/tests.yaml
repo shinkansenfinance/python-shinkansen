@@ -10,16 +10,36 @@ jobs:
         poetry-version: ["1.8.2"]
         os: [ubuntu-22.04, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      POETRY_VIRTUALENVS_IN_PROJECT: "true"
+      POETRY_NO_INTERACTION: "1"
+
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Run image
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: ${{ matrix.poetry-version }}
+          cache: "pip"
+
+      - name: Install pipx
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          if [[ -n "$USERPROFILE" ]]; then
+            echo "$USERPROFILE\\.local\\bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Install Poetry (${{ matrix.poetry-version }}) via pipx
+        shell: bash
+        run: |
+          PYBIN="$(python -c 'import sys; print(sys.executable)')"
+          pipx install "poetry==${{ matrix.poetry-version }}" --python "$PYBIN"
+          poetry --version
+
       - name: Install dependencies
         run: poetry install
+
       - name: Run tests
         run: poetry run pytest
