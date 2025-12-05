@@ -2,11 +2,12 @@
 
 How to use:
 
-After installing python-shinkansen (e.g: `pip install python-shinkansen`) you 
-can use our high level helpers to build messages, send messages and validate 
+After installing python-shinkansen (e.g: `pip install python-shinkansen`) you
+can use our high level helpers to build messages, send messages and validate
 received messages:
 
 ## Sending Payouts
+
 ### Building a payout message
 
 ```python
@@ -54,11 +55,13 @@ message = payouts.PayoutMessage(
 ```python
 message_as_json = message.as_json()
 ```
+
 ### Creating from JSON
 
 ```python
 same_message = payouts.PayoutMessage.from_json(message_as_json)
 ```
+
 ### Signing a message
 
 ```python
@@ -68,16 +71,17 @@ from shinkansen import jws
 private_key = jws.private_key_from_pem_file("/path/to/privatekey.pem",
   password=os.getenv('PRIVATE_KEY_PASSWORD'))
 public_cert = jws.certificate_from_pem_file("/path/to/certificate.pem")
-# You can also use jws.private_key_from_pem_bytes() and 
-# jws.certificate_from_pem_bytes() if you prefer to load everything from env 
+# You can also use jws.private_key_from_pem_bytes() and
+# jws.certificate_from_pem_bytes() if you prefer to load everything from env
 # vars or somewhere else.
 
 signature = message.signature(private_key, public_cert)
 ```
 
-Note that the RSA-PSS signature is non-deterministic, so you might not get the 
-same signature for the same message on every invocation. As long as you 
+Note that the RSA-PSS signature is non-deterministic, so you might not get the
+same signature for the same message on every invocation. As long as you
 don't modify the message, any of those signatures will be valid.
+
 ### Send a message and get the http response
 
 ```python
@@ -90,7 +94,7 @@ payout_http_response = message.send(
 print(f"HTTP Response Status: {payout_http_response.http_status_code}")
 for error in payout_http_response.errors:
     print(f"Error code {error.error_code}: {error.error_message}")
-for transaction in message.transaction:
+for transaction in message.transactions:
     original_tx_id = transaction.transaction_id
     shinkansen_tx_id = payout_http_response.transaction_ids[original_tx_id]
     print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
@@ -112,6 +116,7 @@ for transaction in message.transaction:
 ```
 
 ## Sending Payins
+
 ### Building a payin message
 
 ```python
@@ -146,11 +151,13 @@ message = payins.PayinMessage(
 ```python
 message_as_json = message.as_json()
 ```
+
 ### Creating from JSON
 
 ```python
 same_message = payins.PayinMessage.from_json(message_as_json)
 ```
+
 ### Signing a message
 
 ```python
@@ -160,16 +167,17 @@ from shinkansen import jws
 private_key = jws.private_key_from_pem_file("/path/to/privatekey.pem",
   password=os.getenv('PRIVATE_KEY_PASSWORD'))
 public_cert = jws.certificate_from_pem_file("/path/to/certificate.pem")
-# You can also use jws.private_key_from_pem_bytes() and 
-# jws.certificate_from_pem_bytes() if you prefer to load everything from env 
+# You can also use jws.private_key_from_pem_bytes() and
+# jws.certificate_from_pem_bytes() if you prefer to load everything from env
 # vars or somewhere else.
 
 signature = message.signature(private_key, public_cert)
 ```
 
-Note that the RSA-PSS signature is non-deterministic, so you might not get the 
-same signature for the same message on every invocation. As long as you 
+Note that the RSA-PSS signature is non-deterministic, so you might not get the
+same signature for the same message on every invocation. As long as you
 don't modify the message, any of those signatures will be valid.
+
 ### Send a message and get the http response
 
 ```python
@@ -203,7 +211,6 @@ for transaction in message.transaction:
     print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
 ```
 
-
 ## Validate Shinkansen Responses
 
 When Shinkansen calls you back (using your webhook), you need to parse it and:
@@ -228,17 +235,17 @@ shinkansen_public_certs = [
     jws.certificate_from_pem_file("/path/to/certificate_1.pem"),
     jws.certificate_from_pem_file("/path/to/certificate_2.pem")
 ]
-# ...Or use jws.certificate_from_pem_bytes() if you use env vars for the 
+# ...Or use jws.certificate_from_pem_bytes() if you use env vars for the
 # certificate contents
 
 
-# We'll verify the message was intended for us 
+# We'll verify the message was intended for us
 # (by looking at the receiver header field)
 expected_receiver = common.FinancialInstitution("YOUR-ID-IN-SHINKANSEN")
 
 try:
     response_message.verify(
-        jws_signature, shinkansen_public_certs, 
+        jws_signature, shinkansen_public_certs,
         sender=common.SHINKANSEN, receiver=expected_receiver
     )
 except jws.InvalidJWS:
@@ -257,18 +264,18 @@ except (responses.UnexpectedSender, responses.UnexpectedReceiver):
 print(response_message.header.message_id) # Use for idempotency handling
 print(response_message.header.creation_date)
 for transaction_response in response_message.responses:
-    print(transaction_response.transaction_type) 
+    print(transaction_response.transaction_type)
     # -> e.g: "payout" for a response to a payout transaction
     # The response class will match the transaction type. So you'll get a
     # shinkansen.responses.PayoutResponse for a payout transaction and a
     # shinkansen.responses.PayinResponse for a payin transaction.
     print(transaction_response.transaction_id)
     print(transaction_response.shinkansen_transaction_id)
-    print(transaction_response.shinkansen_transaction_status) 
+    print(transaction_response.shinkansen_transaction_status)
     # ->  Either "ok" or "error"
-    print(transaction_response.shinkansen_transaction_message) 
-    print(transaction_response.response_status) 
-    # -> More specific error codes 
+    print(transaction_response.shinkansen_transaction_message)
+    print(transaction_response.response_status)
+    # -> More specific error codes
     #   (see API docs at https://docs.shinkansen.tech/reference/)
     print(transaction_response.response_message)
 ```
@@ -278,7 +285,7 @@ for transaction_response in response_message.responses:
 With poetry:
 
     $ poetry install
-    $ poetry shell 
+    $ poetry shell
 
 Install pre-commit hooks:
 
@@ -297,9 +304,11 @@ PyPI publishing:
 - Tag as `vX.Y.Z`
 
       $ git tag vX.Y.Z
+
 - Push
 
       $ git push origin main vX.Y.Z
+
 - Then run:
 
       $ poetry build
@@ -313,8 +322,8 @@ PyPI publishing:
 If `poetry install` fails on MacOS, it's likely due to the cryptography library
 trying to be built from source. The right fix is to figure out why it's trying
 to build the library from source instead of downloading a binary wheel. But,
-this  could be a workaround to build from source:
+this could be a workaround to build from source:
 
-   $ brew install rust
-   $ brew install openssl
-   $ env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" poetry install
+$ brew install rust
+$ brew install openssl
+$ env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" poetry install
