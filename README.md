@@ -115,6 +115,20 @@ for transaction in message.transaction:
     print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
 ```
 
+### Send through a proxy
+
+Pass a `requests.Session` to `send()` or `sign_and_send()` to route only the
+Shinkansen API requests through a proxy, without changing the rest of your
+process traffic:
+
+```python
+import requests
+
+session = requests.Session()
+session.proxies = {"https": "http://user:password@proxy.example.com:8080"}
+payout_http_response = message.send(signature, api_key, session=session)
+```
+
 ## Sending Payins
 
 ### Building a payin message
@@ -209,6 +223,20 @@ for transaction in message.transaction:
     original_tx_id = transaction.transaction_id
     shinkansen_tx_id = payin_http_response.transaction_ids[original_tx_id]
     print(f"Our id: {original_tx_id} - Shinkansen id: {shinkansen_tx_id}")
+```
+
+### Send through a proxy
+
+Pass a `requests.Session` to `send()` or `sign_and_send()` to route only the
+Shinkansen API requests through a proxy, without changing the rest of your
+process traffic:
+
+```python
+import requests
+
+session = requests.Session()
+session.proxies = {"https": "http://user:password@proxy.example.com:8080"}
+payin_http_response = message.send(signature, api_key, session=session)
 ```
 
 ## Validate Shinkansen Responses

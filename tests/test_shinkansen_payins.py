@@ -1,5 +1,6 @@
 import uuid
 import json
+from unittest.mock import Mock
 from shinkansen import payins
 
 
@@ -110,6 +111,38 @@ def test_send_with_base_url(requests_mock):
         "sig456", "apikey123", base_url="https://testing.shinkansen.finance/v1"
     )
     assert result.http_status_code == 200
+
+
+def test_send_with_session(requests_mock):
+    message = sample_message()
+    session = Mock()
+    session.post.return_value.status_code = 500
+
+    result = message.send("sig456", "apikey123", session=session)
+
+    assert result.http_status_code == 500
+    session.post.assert_called_once_with(
+        url="https://api.shinkansen.finance/v1/messages/payins",
+        data=message.as_json(),
+        headers={
+            "Content-Type": "application/json",
+            "Shinkansen-Api-Key": "apikey123",
+            "Shinkansen-JWS-Signature": "sig456",
+        },
+    )
+
+
+def test_sign_and_send_with_session(requests_mock):
+    message = sample_message()
+    message.signature = Mock(return_value="sig456")
+    session = Mock()
+    session.post.return_value.status_code = 500
+
+    signature, result = message.sign_and_send(None, None, "apikey123", session=session)
+
+    assert signature == "sig456"
+    assert result.http_status_code == 500
+    session.post.assert_called_once()
 
 
 def test_send_error(requests_mock):
