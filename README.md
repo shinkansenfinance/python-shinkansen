@@ -85,9 +85,13 @@ don't modify the message, any of those signatures will be valid.
 ### Send a message and get the http response
 
 ```python
+import requests
+
 api_key = os.getenv("SHINKANSEN_API_KEY")
+session = requests.Session()
+session.proxies = {"https": "http://proxy.example.com:8080"}
 payout_http_response = message.send(
-    signature, api_key
+    signature, api_key, session=session
     #, base_url=https://dev.shinkansen.finance/v1 if you don't want to hit production
 )
 
@@ -181,9 +185,13 @@ don't modify the message, any of those signatures will be valid.
 ### Send a message and get the http response
 
 ```python
+import requests
+
 api_key = os.getenv("SHINKANSEN_API_KEY")
+session = requests.Session()
+session.proxies = {"https": "http://proxy.example.com:8080"}
 payin_http_response = message.send(
-    signature, api_key
+    signature, api_key, session=session
     #, base_url=https://dev.shinkansen.finance/v1 if you don't want to hit production
 )
 
