@@ -281,13 +281,18 @@ class PayoutMessage:
         certificate: x509.Certificate,
         api_key: str = None,
         base_url: str = None,
+        session: requests.Session = None,
     ) -> Tuple[str, PayoutHttpResponse]:
         """Signs the message and sends it to the Shinkansen API"""
         signature = self.signature(certificate_private_key, certificate)
-        return (signature, self.send(signature, api_key, base_url))
+        return (signature, self.send(signature, api_key, base_url, session))
 
     def send(
-        self, signature: str, api_key: str = None, base_url: str = None
+        self,
+        signature: str,
+        api_key: str = None,
+        base_url: str = None,
+        session: requests.Session = None,
     ) -> PayoutHttpResponse:
         """Sends the message to the Shinkansen API"""
         base_url = base_url or SHINKANSEN_API_V1_BASE_URL
@@ -296,7 +301,8 @@ class PayoutMessage:
             raise ShinkansenException(
                 "No api_key argument and SHINKANSEN_API_KEY not found in env"
             )
-        response = requests.post(
+        http = session if session is not None else requests
+        response = http.post(
             url=f"{base_url}/messages/payouts",
             data=self.as_json(),
             headers={
